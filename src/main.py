@@ -3,6 +3,7 @@ import uuid
 from bson.json_util import dumps
 from datetime import datetime, timedelta, date
 import time
+import os
 
 while True:
     myclient = pymongo.MongoClient(f'mongodb://{os.environ["MONGO_URL"]}:27017',username=os.environ["MONGO_USER"],password=os.environ["MONGO_PS"], unicode_decode_error_handler='ignore')
