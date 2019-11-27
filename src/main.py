@@ -84,9 +84,16 @@ while True:
                 for idxh, elemento_historico in enumerate(usr_htr["historico"]):
                     if elemento_historico["fecha"] == proseso["fecha"] and elemento_historico["nombre"] == proseso["nombre"]:
                         print("se actualiza el inxex del historico: "+ str(idxh))
+                        tiempoTotal = data_historica[idxh]["tiempoTotal"]
+                        if data_historica[idxh]["tiempoTotal"] > proseso["tiempoTotal"]:
+                            h1 = datetime.strptime(data_historica[idxh]["tiempoTotal"], '%H:%M:%S')
+                            h2 = str(proseso["tiempoTotal"]).split(":")
+                            h3 = ((int(h2[0]))+int(h2[1])*60)+int(h2[2])
+                            h1 = h1 + timedelta(seconds=int(h3))
+                            tiempoTotal = h1.strftime("%H:%M:%S")
                         data_historica[idxh]["tiempoTotal"] = proseso["tiempoTotal"]
                         data_historica[idxh]["ventanas"] = proseso["ventanas"]
-                        data_historica[idxh]["tiempoTotal"] = proseso["tiempoTotal"]
+                        data_historica[idxh]["tiempoTotal"] = tiempoTotal
                         data_historica[idxh]["estado"] = proseso["estado"]
                 if not list(filter(lambda x: x["nombre"] == proseso["nombre"] and x["fecha"] == str(today), data_historica)):
                     print("Se agrega un nuevo historico")
