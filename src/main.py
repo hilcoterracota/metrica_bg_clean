@@ -84,7 +84,7 @@ while True:
                 for idxh, elemento_historico in enumerate(usr_htr["historico"]):
                     if elemento_historico["fecha"] == proseso["fecha"] and elemento_historico["nombre"] == proseso["nombre"]:
                         print("se actualiza el inxex del historico: "+ str(idxh))
-                        tiempoTotal = data_historica[idxh]["tiempoTotal"]
+                        tiempoTotal = proseso[idxh]["tiempoTotal"]
                         if data_historica[idxh]["tiempoTotal"] > proseso["tiempoTotal"]:
                             h1 = datetime.strptime(data_historica[idxh]["tiempoTotal"], '%H:%M:%S')
                             h2 = str(proseso["tiempoTotal"]).split(":")
