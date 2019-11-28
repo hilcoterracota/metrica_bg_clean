@@ -63,6 +63,10 @@ while True:
 
         if(nombre_usuario != ""):
             nombre_usuario = nombre_usuario.split("\\")[1]
+        else:
+            nombre_usuario = usuario["hostname"]
+            print(nombre_usuario)
+        
         snapshot.append({
             "userId":userId,
             "usuario":nombre_usuario,
@@ -103,6 +107,7 @@ while True:
                             h1 = h1 + timedelta(seconds=(int(h3_a)-int(h2_a)))
                             tiempoTotalAcumulado = h1.strftime("%H:%M:%S")
                         
+                       
                         data_historica[idxh]["ventanas"] = proseso["ventanas"]
                         data_historica[idxh]["tiempoTotal"] = tiempoTotalAcumulado
                         data_historica[idxh]["tiempoAnterior"] = proseso["tiempoTotal"]
