@@ -5,19 +5,21 @@ from datetime import datetime, timedelta, date
 import time
 import os
 
-myclient = pymongo.MongoClient(f'mongodb://{os.environ["MONGO_URL"]}:27017',username=os.environ["MONGO_USER"],password=os.environ["MONGO_PS"], unicode_decode_error_handler='ignore')
-mydb = myclient["HTERRACOTA"]
-mycol = mydb["info_pc"]
-info_pc_historico = mydb['info_pc_historico']
+
 
 while True:
-    
 
+    myclient = pymongo.MongoClient(f'mongodb://{os.environ["MONGO_URL"]}:27017',username=os.environ["MONGO_USER"],password=os.environ["MONGO_PS"], unicode_decode_error_handler='ignore')
+    mydb = myclient["HTERRACOTA"]
+    mycol = mydb["info_pc"]
+    info_pc_historico = mydb['info_pc_historico']
+    
     snapshot= []
     today = date.today()
 
     try:
         for usuario in mycol.find():
+            print("actualizando pc: "+str(usuario['hostname']))
             userId = str(usuario['hostiduiid'])
             listaprosesos = []
             listaprosesos_aux  = []
@@ -119,7 +121,9 @@ while True:
                     if not list(filter(lambda x: x["nombre"] == proseso["nombre"] and x["fecha"] == str(today), data_historica)):
                         data_historica.append(proseso)
                     info_pc_historico.update_many({"userId":element["userId"]}, {"$set":{"historico":data_historica}}, upsert=True)
+    
     except:
+        myclient.close()
         print("An exception occurred")
     
     time.sleep(5)
