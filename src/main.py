@@ -4,6 +4,7 @@ from bson.json_util import dumps
 from datetime import datetime, timedelta, date
 import time
 import os
+import calendar
 
 
 while True:
@@ -12,7 +13,7 @@ while True:
     hora_entrada = datetime(ahora.year, ahora.month, ahora.day, hour=9, minute=0)
     hora_salida = datetime(ahora.year, ahora.month, ahora.day, hour=18, minute=30)
 
-    if ahora >= hora_entrada and ahora <= hora_salida:
+    if ahora >= hora_entrada and ahora <= hora_salida and calendar.day_name[ahora.weekday()] not in ['Saturday','Sunday']  :
         myclient = pymongo.MongoClient(f'mongodb://192.168.2.2:27017',username="root",password="@H1lcotadmin")
         mydb = myclient["HTERRACOTA"]
         mycol = mydb["info_pc"]
