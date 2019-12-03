@@ -67,15 +67,12 @@ while True:
 
                 if(nombre_usuario != ""):
                     nombre_usuario = nombre_usuario.split("\\")[1]
-                else:
-                    nombre_usuario = usuario["hostname"]
-
-                snapshot.append({
-                    "userId":userId,
-                    "usuario":nombre_usuario,
-                    "listaprosesos":sorted(au_au, key=lambda element: element['usoMemoria'],reverse=True),
-                    "tiempoUsoGlobal": str(tiempo_uso_global)
-                }) 
+                    snapshot.append({
+                        "userId":userId,
+                        "usuario":nombre_usuario,
+                        "listaprosesos":sorted(au_au, key=lambda element: element['usoMemoria'],reverse=True),
+                        "tiempoUsoGlobal": str(tiempo_uso_global)
+                    }) 
                 
             for element in snapshot:
                 usr_htr = myclient["HTERRACOTA"]["info_pc_historico"].find_one({'usuario': element["usuario"]})
