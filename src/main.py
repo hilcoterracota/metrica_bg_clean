@@ -24,6 +24,8 @@ while True:
                 listaprosesos_aux  = []
                 nombre_usuario = ""
                 tiempo_uso_global = datetime.strptime('00:00:00', '%H:%M:%S')
+
+
                 
                 for proseso in usuario['infoprosses']: 
                     lista_pestanias = []
@@ -65,15 +67,18 @@ while True:
 
                 au_au = list(au)
 
-                if(nombre_usuario != ""):
-                    nombre_usuario = nombre_usuario.split("\\")[1]
+                try:
+                    if(nombre_usuario != "" and str(ahora).split(" ")[0]) == usuario["fechaupdate"].split(" ")[0]:
+                        nombre_usuario = nombre_usuario.split("\\")[1]
                     snapshot.append({
                         "userId":userId,
                         "usuario":nombre_usuario,
                         "listaprosesos":sorted(au_au, key=lambda element: element['usoMemoria'],reverse=True),
                         "tiempoUsoGlobal": str(tiempo_uso_global)
                     }) 
-                
+                except:
+                    print("An exception append occurred")
+        
             for element in snapshot:
                 usr_htr = myclient["HTERRACOTA"]["info_pc_historico"].find_one({'usuario': element["usuario"]})
                 if "None" == str(usr_htr):
@@ -100,6 +105,7 @@ while True:
                                     h3_a = ((int(h3[0]))+int(h3[1])*60)+int(h3[2])
                                     h1 = h1 + timedelta(seconds=(int(h3_a)-int(h2_a)))
                                     tiempoTotalAcumulado = h1.strftime("%H:%M:%S")
+
                                 data_historica[idxh]["ventanas"] = proseso["ventanas"]
                                 data_historica[idxh]["tiempoTotal"] = tiempoTotalAcumulado
                                 data_historica[idxh]["tiempoAnterior"] = proseso["tiempoTotal"]
@@ -116,7 +122,7 @@ while True:
             print("An exception occurred")
     
         myclient.close()
-
+    
     time.sleep(5)
         
                     
