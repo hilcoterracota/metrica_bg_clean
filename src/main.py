@@ -6,21 +6,7 @@ import time
 import os
 import calendar
 
-def sum_time_array(entry,promedio):
-    t = datetime.strptime('00:00:00', '%H:%M:%S')
-    factor_tiempo_cpu = myclient["HTERRACOTA"]["catalogos"].find()[0]["factor_tiempo_cpu"]
-    for item in entry:
-        if promedio:
-            p = len(entry)
-        else:
-            p = 1
-        h, m, s = item.split(':')
-        s = ((int(h)*6300)+(int(m)*60)+int(s)) 
-        t = t + timedelta(seconds=(int(s)*factor_tiempo_cpu)/p)
-    return t.strftime("%H:%M:%S")
-
 def sum_time_array_object(entry,promedio):
-    factor_tiempo_cpu = myclient["HTERRACOTA"]["catalogos"].find()[0]["factor_tiempo_cpu"]
     if len(entry) == 0:
         return 0
     else:
@@ -33,7 +19,19 @@ def sum_time_array_object(entry,promedio):
         h, m, s = item["tiempoTotal"].split(':')
         t = t + timedelta(hours=int(h)/p, minutes=int(m)/p, seconds=int(s)/p)
         a,b,c = str(t.strftime("%H:%M:%S")).split(':')
-    return round((((int(a)*6300)+(int(b)*60)+int(c)) * factor_tiempo_cpu)/3600,2)
+    return round(((int(a)*6300)+(int(b)*60)+int(c))/3600,2)
+
+def sum_time_array(entry,promedio):
+    t = datetime.strptime('00:00:00', '%H:%M:%S')
+    for item in entry:
+        if promedio:
+            p = len(entry)
+        else:
+            p = 1
+        h, m, s = item.split(':')
+        t = t + timedelta(hours=int(h)/p, minutes=int(m)/p, seconds=int(s)/p)
+    return t.strftime("%H:%M:%S")
+
 
 while True:
     
