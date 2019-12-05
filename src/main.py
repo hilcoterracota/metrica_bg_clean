@@ -106,11 +106,13 @@ while True:
                                 tiempoTotalAcumulado = proseso["tiempoTotal"]
                                 if "tiempoAnterior" not in data_historica[idxh] :
                                     data_historica[idxh]["tiempoAnterior"]=proseso["tiempoTotal"]
-                                if proseso["tiempoTotal"] >= data_historica[idxh]["tiempoTotal"]:
+                                X1P = datetime.strptime(proseso["tiempoTotal"], '%H:%M:%S')
+                                x2P = datetime.strptime(data_historica[idxh]["tiempoAnterior"], '%H:%M:%S')
+                                if X1P >= x2P:
                                     tiempoTotalAcumulado = proseso["tiempoTotal"]
                                 else:
                                     tiempoTotalAcumulado = sum_time_array([proseso["tiempoTotal"],tiempoTotalAcumulado],False)
-
+                                
                                 data_historica[idxh]["ventanas"] = proseso["ventanas"]
                                 data_historica[idxh]["tiempoTotal"] = tiempoTotalAcumulado
                                 data_historica[idxh]["tiempoAnterior"] = proseso["tiempoTotal"]
