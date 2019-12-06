@@ -44,7 +44,9 @@ while True:
         try:
             snapshot= []
             today = date.today()
-            for usuario in myclient["HTERRACOTA"]["info_pc"].find():
+            myclient["HTERRACOTA"]["info_pc"].delete_many({'fechaupdate':  {'$regex':f'^((?!{str(today)}).)*$'}})
+            myclient["HTERRACOTA"]["info_pc"].update_many({}, {'$set':{'fechaupdate': f'{str(today)} no-update'}})
+            for usuario in myclient["HTERRACOTA"]["info_pc"].find({ 'fechaupdate':  {'$regex':str(today)}}):
                 userId = usuario['hostiduiid']
                 listaprosesos = []
                 listaprosesos_aux  = []
@@ -55,8 +57,10 @@ while True:
                     kb_uso_memoria = 0
                     tiempo_uso_app = []
                     for pestania in usuario['infoprosses']:
+                        
                         if proseso['nombredeimagen'] == pestania['nombredeimagen']:
                             if str(pestania["tiempodecpu"]) != "0:00:00" and "HILCOTERRACOTA" in str(pestania["nombredeusuario"]):
+                                
                                 lista_pestanias.append({
                                     "tituloVentana": str(pestania["ttulodeventana"]),
                                     "tiempoDeUso": str(pestania["tiempodecpu"])
@@ -75,21 +79,29 @@ while True:
                             "ventanas":lista_pestanias,
                             "fecha":str(today)
                         })
-
+            
                 au = filter(lambda x: x["tiempoTotal"].split(":")[1] != "00", listaprosesos_aux)
                 
                 if  "fechaupdate" in usuario:
-                    if(nombre_usuario != "" and str(ahora).split(" ")[0]) == usuario["fechaupdate"].split(" ")[0]:
+                
+                    if nombre_usuario != "":
                         nombre_usuario = nombre_usuario.split("\\")[1]
-                        snapshot.append({
-                            "userId":userId,
-                            "usuario":nombre_usuario,
-                            "listaprosesos":sorted(list(au), key=lambda element: element['usoMemoria'],reverse=True),
-                            "tiempoUsoGlobal": sum_time_array_object(listaprosesos_aux,False)
-                        }) 
+                        if str(ahora).split(" ")[0] == usuario["fechaupdate"].split(" ")[0]:
+                            ip = "0.0.0.0"
+                            for interface in usuario['interfaces']: 
+                                if interface["interfacename"] == "Ethernet":
+                                    ip = interface["ips"][1]
+                        
+                            snapshot.append({
+                                "userId":userId,
+                                "usuario":nombre_usuario,
+                                "ip":ip,
+                                "listaprosesos":sorted(list(au), key=lambda element: element['usoMemoria'],reverse=True),
+                                "tiempoUsoGlobal": sum_time_array_object(listaprosesos_aux,False)
+                            }) 
                 else:
-                    print(usuario['hostiduiid'])                
-
+                    print(usuario['hostiduiid'])
+                    
             for element in snapshot:
                 usr_htr = myclient["HTERRACOTA"]["info_pc_historico"].find_one({'usuario': element["usuario"]})
                 if "None" == str(usr_htr):
@@ -104,6 +116,7 @@ while True:
                         for idxh, elemento_historico in enumerate(usr_htr["historico"]):
                             if elemento_historico["fecha"] == proseso["fecha"] and elemento_historico["nombre"] == proseso["nombre"]:
                                 tiempoTotalAcumulado = proseso["tiempoTotal"]
+                                
                                 if "tiempoAnterior" not in data_historica[idxh] :
                                     data_historica[idxh]["tiempoAnterior"]=proseso["tiempoTotal"]
                                 X1P = datetime.strptime(proseso["tiempoTotal"], '%H:%M:%S')
@@ -112,6 +125,7 @@ while True:
                                     tiempoTotalAcumulado = proseso["tiempoTotal"]
                                 else:
                                     tiempoTotalAcumulado = sum_time_array([proseso["tiempoTotal"],tiempoTotalAcumulado],False)
+                                
                                 
                                 data_historica[idxh]["ventanas"] = proseso["ventanas"]
                                 data_historica[idxh]["tiempoTotal"] = tiempoTotalAcumulado
@@ -123,7 +137,10 @@ while True:
                             data_historica.append(proseso)
                             print(f'Agragando {element["usuario"]} - {proseso["nombre"]}: {proseso["tiempoTotal"]}')
 
+                        
                         myclient["HTERRACOTA"]["info_pc_historico"].update_many({"usuario":element["usuario"]}, {"$set":{"historico":data_historica}}, upsert=True)
+                        myclient["HTERRACOTA"]["info_pc_historico"].update_many({"usuario":element["usuario"]}, {"$set":{"ip":element["ip"]}}, upsert=True)        
+        
         except: 
             print("An exception occurred")
     
