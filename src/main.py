@@ -74,7 +74,10 @@ while True:
                         ip = "0.0.0.0"
                         for interface in usuario['interfaces']: 
                             if interface["interfacename"] == "Ethernet":
-                                ip = interface["ips"][1]
+                                if len(interface["ips"])==1:
+                                    ip = interface["ips"][0]
+                                else:  
+                                    ip = interface["ips"][1]
                     
                         snapshot.append({
                             "userId":userId,
