@@ -5,6 +5,9 @@ from datetime import datetime, timedelta, date
 import time
 import os
 import calendar
+import subprocess
+import ipaddress
+from subprocess import Popen, PIPE
 
 def sum_time_array_clear(entry):
     totalSecs = 0
@@ -126,7 +129,71 @@ while True:
                     myclient["HTERRACOTA"]["info_pc_historico"].update_many({"usuario":element["usuario"]}, {"$set":{"historico":data_historica}}, upsert=True)
                     myclient["HTERRACOTA"]["info_pc_historico"].update_many({"usuario":element["usuario"]}, {"$set":{"ip":element["ip"]}}, upsert=True)
 
+        today2    = date.today() + timedelta(days=1)  
+        today2    = today2.strftime("%Y/%m/%d").replace("/","-")
+        ip_net    = ipaddress.ip_network(u'192.168.1.0/24', strict=False)
+        ip_online = []
+        print("Analizando red...")
+        for ip in ip_net.hosts():
+            ip = str(ip)
+            print(ip)
+            toping = Popen(['ping', '-c', '1', '-W', '50', ip], stdout=PIPE)
+            output = toping.communicate()[0]
+            hostalive = toping.returncode
+            if hostalive ==0:
+                ip_online.append(ip)
 
-    time.sleep(5)
+        print(len(ip_online),"host encontrados")
+
+        data = []
+        for ip in ip_online:
+            myclient = pymongo.MongoClient(f'mongodb://{os.environ["MONGO_URL"]}:27017',username=os.environ["MONGO_USER"],password=os.environ["MONGO_PS"], unicode_decode_error_handler='ignore')
+            
+            try:  
+                r = rqst.get(f'http://{ip}:5600/',verify=False, timeout=3)
+                if r.status_code == 200:
+                    r = rqst.get(f'http://{ip}:5600/api/0/buckets/',verify=False, timeout=5)
+                    keys = list(r.json().keys())
+                    host = ""
+                    for key in keys:
+                        if "aw-watcher-afk_" in key:
+                            host = key.replace("aw-watcher-afk_","")
+                
+                            
+                    payload = "{\n    \"query\": [\n        \"events  = flood(query_bucket('aw-watcher-window_"+host+"'));\",\n        \"not_afk = flood(query_bucket('aw-watcher-afk_"+host+"'));\",\n        \"not_afk = filter_keyvals(not_afk, 'status', ['not-afk']);\",\n        \"events  = filter_period_intersect(events, not_afk);\",\n        \"title_events = sort_by_duration(merge_events_by_keys(events, ['app', 'title']));\",\n        \"app_events   = sort_by_duration(merge_events_by_keys(title_events, ['app']));\",\n        \"cat_events   = sort_by_duration(merge_events_by_keys(events, ['$category']));\",\n        \"events = sort_by_timestamp(events);\",\n        \"app_events  = limit_events(app_events, 100);\",\n        \"title_events  = limit_events(title_events, 100);\",\n        \"duration = sum_durations(events);\",\n        \"RETURN  = {'app_events': app_events, 'title_events': title_events, 'cat_events': cat_events, 'duration': duration, 'active_events': not_afk};\"\n    ],\n    \"timeperiods\": [\n        \"2019-12-22/"+today2+"\"\n    ]\n}"
+                    headers = {
+                        'Content-Type': "application/json"
+                    }
+                    r = rqst.request("POST", f'http://{ip}:5600/api/0/query/', data = payload, headers=headers)
+                    
+                    if r.status_code == 200:   
+                        response = r.json()[0]
+                        usr_htr = myclient["HTERRACOTA"]["ipcht"].find_one({"host":host})
+                        
+                        if "None" == str(usr_htr):
+                            myclient["HTERRACOTA"]["ipcht"].insert_one({
+                                "host"         : host,
+                                "app_events"   : response["app_events"],
+                                "title_events" : response["title_events"],
+                                "cat_events"   : response["cat_events"],
+                                "active_events": response["active_events"],
+                                "duration"     : response["duration"],
+                                "ip": ip
+                                })
+                        else:
+                            myclient["HTERRACOTA"]["ipcht"].update_many(
+                                {"host":host}, 
+                                {"$set":{
+                                    "app_events"   : response["app_events"],
+                                    "title_events" : response["title_events"],
+                                    "cat_events"   : response["cat_events"],
+                                    "active_events": response["active_events"],
+                                    "duration"     : response["duration"],
+                                    "ip": ip
+                                }}, upsert=True)
+                        print(ip,host,"actualizado!")
+            except:
+                print(ip,"ERROR: ")
+
 
                         
