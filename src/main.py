@@ -129,7 +129,9 @@ while True:
                     myclient["HTERRACOTA"]["info_pc_historico"].update_many({"usuario":element["usuario"]}, {"$set":{"historico":data_historica}}, upsert=True)
                     myclient["HTERRACOTA"]["info_pc_historico"].update_many({"usuario":element["usuario"]}, {"$set":{"ip":element["ip"]}}, upsert=True)
 
-        today2    = date.today() + timedelta(days=1)  
+        today1    = date.today()
+        today2    = date.today() + timedelta(days=1) 
+        today1    = today1.strftime("%Y/%m/%d").replace("/","-")
         today2    = today2.strftime("%Y/%m/%d").replace("/","-")
         ip_net    = ipaddress.ip_network(u'192.168.1.0/24', strict=False)
         ip_online = []
@@ -160,7 +162,7 @@ while True:
                             host = key.replace("aw-watcher-afk_","")
                 
                             
-                    payload = "{\n    \"query\": [\n        \"events  = flood(query_bucket('aw-watcher-window_"+host+"'));\",\n        \"not_afk = flood(query_bucket('aw-watcher-afk_"+host+"'));\",\n        \"not_afk = filter_keyvals(not_afk, 'status', ['not-afk']);\",\n        \"events  = filter_period_intersect(events, not_afk);\",\n        \"title_events = sort_by_duration(merge_events_by_keys(events, ['app', 'title']));\",\n        \"app_events   = sort_by_duration(merge_events_by_keys(title_events, ['app']));\",\n        \"cat_events   = sort_by_duration(merge_events_by_keys(events, ['$category']));\",\n        \"events = sort_by_timestamp(events);\",\n        \"app_events  = limit_events(app_events, 100);\",\n        \"title_events  = limit_events(title_events, 100);\",\n        \"duration = sum_durations(events);\",\n        \"RETURN  = {'app_events': app_events, 'title_events': title_events, 'cat_events': cat_events, 'duration': duration, 'active_events': not_afk};\"\n    ],\n    \"timeperiods\": [\n        \"2019-12-22/"+today2+"\"\n    ]\n}"
+                    payload = "{\n    \"query\": [\n        \"events  = flood(query_bucket('aw-watcher-window_"+host+"'));\",\n        \"not_afk = flood(query_bucket('aw-watcher-afk_"+host+"'));\",\n        \"not_afk = filter_keyvals(not_afk, 'status', ['not-afk']);\",\n        \"events  = filter_period_intersect(events, not_afk);\",\n        \"title_events = sort_by_duration(merge_events_by_keys(events, ['app', 'title']));\",\n        \"app_events   = sort_by_duration(merge_events_by_keys(title_events, ['app']));\",\n        \"cat_events   = sort_by_duration(merge_events_by_keys(events, ['$category']));\",\n        \"events = sort_by_timestamp(events);\",\n        \"app_events  = limit_events(app_events, 100);\",\n        \"title_events  = limit_events(title_events, 100);\",\n        \"duration = sum_durations(events);\",\n        \"RETURN  = {'app_events': app_events, 'title_events': title_events, 'cat_events': cat_events, 'duration': duration, 'active_events': not_afk};\"\n    ],\n    \"timeperiods\": [\n        \""+today1+"/"+today2+"\"\n    ]\n}"
                     headers = {
                         'Content-Type': "application/json"
                     }
