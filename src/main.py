@@ -1,9 +1,9 @@
-from datetime import timedelta
 import pandas as pd
 import requests as rqs
 import os
 import json
 import pymongo
+import datetime
 
 myclient = pymongo.MongoClient(f'mongodb://{os.environ["MONGO_URL"]}:27017',username=os.environ["MONGO_USERNAME"],password=os.environ["MONGO_PASSWORD"], unicode_decode_error_handler='ignore')
 activitywatch_db = myclient["activitywatch"]
