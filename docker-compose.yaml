@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+
+  terracota:
+    container_name: terracota
+    build:
+        context: ./
+        dockerfile: Dockerfile
+    deploy:
+      replicas: 1
+    network_mode: bridge
+    environment:
+        MONGO_URL: "192.168.2.1"
+        MONGO_USERNAME: "hterra"
+        MONGO_PASSWORD: "terrac0t@"
+        MONGO_IP3: "192.168.3"
+
