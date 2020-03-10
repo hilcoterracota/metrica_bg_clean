@@ -12,7 +12,7 @@ aw_watcher_window_db = myclient["activitywatch"]["aw-watcher-window"]
 while True:
     for value in range(100,200):
         ip = f'{os.environ["MONGO_IP3"]}.{value}'
-        try:  
+         try:  
             data = rqs.get(f'http://{ip}:5600/api/0/export').json()
             host = ''
             for key in data['buckets'].keys(): 
@@ -22,11 +22,11 @@ while True:
                 if 'aw-watcher-afk' in key:
                     aw_afk = data['buckets'][key]
             events = [{
-                "timestamp": pd.to_datetime(df['timestamp'], infer_datetime_format=True),
-                "duration": e["duration"],
+                "timestamp": pd.to_datetime(e['timestamp'], infer_datetime_format=True),
+                "duration": e['duration'],
                 "host": host.upper(),
                 **e["data"]
-            } for e in aw_window['events'] if ".exe" in e["timestamp"]]
+            } for e in aw_window['events']]
             print(str(datetime.datetime.today()),ip,"Actualizando db ...")
             aw_watcher_window_db.delete_many ({"host": host})
             print(str(datetime.datetime.today()),ip,"Agragando nueva data ...")
