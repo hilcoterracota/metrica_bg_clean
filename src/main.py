@@ -22,11 +22,11 @@ while True:
                 if 'aw-watcher-afk' in key:
                     aw_afk = data['buckets'][key]
             events = [{
-                "timestamp": datetime.datetime.strptime(e["timestamp"], "%Y-%m-%d %H:%M:%S,%f").timetuple(),
+                "timestamp": e["timestamp"],
                 "duration": e["duration"],
                 "host": host.upper(),
                 **e["data"]
-            } for e in aw_window['events'] if ".exe" in e["timestamp"]]
+            } for e in aw_window['events']]
             print(str(datetime.datetime.today()),ip,"Actualizando db ...")
             aw_watcher_window_db.delete_many ({"host": host})
             print(str(datetime.datetime.today()),ip,"Agragando nueva data ...")
