@@ -12,7 +12,7 @@ aw_watcher_window_db = myclient["activitywatch"]["aw-watcher-window"]
 while True:
     for value in range(100,200):
         ip = f'{os.environ["MONGO_IP3"]}.{value}'
-         try:  
+        try:  
             data = rqs.get(f'http://{ip}:5600/api/0/export').json()
             host = ''
             for key in data['buckets'].keys(): 
