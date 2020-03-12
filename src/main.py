@@ -27,10 +27,26 @@ while True:
                 "host": host.upper(),
                 **e["data"]
             } for e in aw_window['events']]
+
+            df = pd.DataFrame(events)
+            df['timestamp'] = pd.to_datetime(df['timestamp'],infer_datetime_format=True)
+            df['date'] = [x.astimezone(pytz.timezone('America/Mexico_City'))
+                        for x in df['timestamp']]
+            df['year'] = df['date'].dt.year
+            df['month'] = df['date'].dt.month
+            df['day'] = df['date'].dt.day
+            df['hour'] = df['date'].dt.hour
+            df['minute'] = df['date'].dt.minute
+            df['time'] = df['duration'].apply(lambda x:
+                '{:.0f} hr {:.0f} min {:.0f} secs'.format(
+                    divmod(x,60*60)[0],
+                    *divmod(divmod(x,60*60)[1],60))
+                                            )
+            df = df.drop(['timestamp','date'], axis=1)
             print(str(datetime.datetime.today()),ip,"Actualizando db ...")
             aw_watcher_window_db.delete_many ({"host": host})
             print(str(datetime.datetime.today()),ip,"Agragando nueva data ...")
-            aw_watcher_window_db.insert_many(events)
+            aw_watcher_window_db.insert_many(df.to_dict(orient='records'))
             print(str(datetime.datetime.today()),ip,host,"Actualizado!")
         except:
             print(str(datetime.datetime.today()),ip,"ERROR")
