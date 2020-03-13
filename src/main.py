@@ -4,6 +4,7 @@ import os
 import json
 import pymongo
 import datetime
+import pytz
 
 myclient = pymongo.MongoClient(f'mongodb://{os.environ["MONGO_URL"]}:27017',username=os.environ["MONGO_USERNAME"],password=os.environ["MONGO_PASSWORD"], unicode_decode_error_handler='ignore')
 activitywatch_db = myclient["activitywatch"]
@@ -22,7 +23,7 @@ while True:
                 if 'aw-watcher-afk' in key:
                     aw_afk = data['buckets'][key]
             events = [{
-                "timestamp": pd.to_datetime(e['timestamp'], infer_datetime_format=True),
+                "timestamp": e['timestamp'],
                 "duration": e['duration'],
                 "host": host.upper(),
                 **e["data"]
