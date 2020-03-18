@@ -50,6 +50,7 @@ while True:
             df = df.loc[df['app']!= "LOCKAPP"]
             df = df.loc[df['app']!= "UNKNOWN"]
             df = df.loc[df['title']!= ""]
+            df = df.loc[df['duration']!= 0]
 
             df = df.drop(['timestamp','date'], axis=1)
             print(str(datetime.datetime.today()),ip,"Actualizando db ...")
