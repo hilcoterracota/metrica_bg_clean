@@ -43,6 +43,14 @@ while True:
                     divmod(x,60*60)[0],
                     *divmod(divmod(x,60*60)[1],60))
                                             )
+
+            df['app'] = df['app'].str.upper()
+            df['app'] = df['app'].str.replace(".EXE","")
+
+            df = df.loc[df['app']!= "LOCKAPP"]
+            df = df.loc[df['app']!= "UNKNOWN"]
+            df = df.loc[df['title']!= ""]
+
             df = df.drop(['timestamp','date'], axis=1)
             print(str(datetime.datetime.today()),ip,"Actualizando db ...")
             aw_watcher_window_db.delete_many ({"host": host})
