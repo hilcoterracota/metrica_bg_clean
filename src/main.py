@@ -54,7 +54,7 @@ while True:
 
             df = df.drop(['timestamp','date'], axis=1)
             print(str(datetime.datetime.today()),ip,"Actualizando db ...")
-            aw_watcher_window_db.delete_many ({"host": host})
+            aw_watcher_window_db.delete_many ({"host": host.upper()})
             print(str(datetime.datetime.today()),ip,"Agragando nueva data ...")
             aw_watcher_window_db.insert_many(df.to_dict(orient='records'))
             print(str(datetime.datetime.today()),ip,host,"Actualizado!")
